@@ -12,11 +12,11 @@ options.add_argument('--window-size=1920,1080')
 options.add_argument('--disable-blink-features=AutomationControlled')
 # options.add_experimental_option('excludeSwitches', ['enable-automation'])
 options.add_argument(f'--user-agent={UserAgent().random}')
-# options.add_argument('headless')
+options.add_argument('--headless')
 # options.add_experimental_option('useAutomationExtension', False)
 
-driver = webdriver.Chrome(service=service, options=options)
-driver.get('https://www.ozon.ru')
+driver = webdriver.Chrome(options=options)
+
 driver.execute_cdp_cmd('Page.addScriptToEvaluateOnNewDocument', {
     'source': '''
         delete window.cdc_adoQpoasnfa76pfcZLmcfl_Array;
@@ -27,6 +27,7 @@ driver.execute_cdp_cmd('Page.addScriptToEvaluateOnNewDocument', {
         delete window.cdc_adoQpoasnfa76pfcZLmcfl_Symbol;
 '''
 })
+driver.get('https://www.ozon.ru')
 sleep(5)
 driver.save_screenshot(f"{os.getcwd()}/screen.png")
 sleep(300)

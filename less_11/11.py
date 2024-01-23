@@ -4,9 +4,8 @@ from selenium import webdriver
 from selenium.common.exceptions import NoAlertPresentException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
-from webdriver_manager.chrome import ChromeDriverManager
 
-service = webdriver.ChromeService(executable_path=ChromeDriverManager().install())
+service = webdriver.ChromeService()
 options = webdriver.ChromeOptions()
 options.add_argument('--window-size=1980,1080')  # type: ignore
 

@@ -7,10 +7,12 @@ from webdriver_manager.chrome import ChromeDriverManager
 options = webdriver.ChromeOptions()
 options.page_load_strategy = 'eager'
 options.add_argument('--window-size=1920,780')
+# options.add_experimental_option("detach", True)
+
 
 service = Service(executable_path=ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service, options=options)
-# driver.maximize_window()
+
 
 driver.get('https://demoqa.com/text-box')
 full_name = driver.find_element('xpath', '//input[@id="userName"]')
@@ -41,4 +43,4 @@ for item in data_lst:
     item.click()
     sleep(3)
     driver.back()
-sleep(5)
+

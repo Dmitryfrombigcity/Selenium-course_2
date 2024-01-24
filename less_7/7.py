@@ -63,11 +63,11 @@ def check_tags(driver: WebDriver,
 def main() -> None:
     tags = ('div', 'a', 'p')
     url = 'https://hyperskill.org/tracks'
-    driver = driver_init()
-    wait = waiting(driver)
-    elms = collect_tags(driver, wait, url, tags)
-    locators = create_locators(elms)
-    check_tags(driver, wait, locators)
+    with driver_init() as driver:
+        wait = waiting(driver)
+        elms = collect_tags(driver, wait, url, tags)
+        locators = create_locators(elms)
+        check_tags(driver, wait, locators)
 
 
 if __name__ == '__main__':

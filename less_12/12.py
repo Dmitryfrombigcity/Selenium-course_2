@@ -4,6 +4,8 @@ from time import sleep
 from fake_useragent import UserAgent
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support import expected_conditions as ec
+from selenium.webdriver.support.wait import WebDriverWait
 
 options = webdriver.ChromeOptions()
 service = webdriver.ChromeService(executable_path=ChromeDriverManager().install())
@@ -16,7 +18,7 @@ options.add_argument('--headless')
 # options.add_experimental_option('useAutomationExtension', False)
 
 driver = webdriver.Chrome(options=options)
-
+wait = WebDriverWait(driver=driver, timeout=10)
 driver.execute_cdp_cmd('Page.addScriptToEvaluateOnNewDocument', {
     'source': '''
         delete window.cdc_adoQpoasnfa76pfcZLmcfl_Array;
@@ -28,6 +30,8 @@ driver.execute_cdp_cmd('Page.addScriptToEvaluateOnNewDocument', {
 '''
 })
 driver.get('https://www.ozon.ru')
-sleep(5)
-driver.save_screenshot(f"{os.getcwd()}/screen.png")
+driver.save_screenshot(f"{os.getcwd()}/before.png")
+wait.until(ec.presence_of_element_located(('xpath', '//button[@id="reload-button"]'))).click()
+driver.save_screenshot(f"{os.getcwd()}/after.png")
+print(driver.title)
 sleep(300)

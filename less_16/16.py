@@ -53,7 +53,12 @@ with (webdriver.Chrome(options=options, service=service) as driver):
 
 
     choose_dropdown_element_by_text("Another root option").click()
-    sleep(5)
+    sleep(1)
+
+    driver.find_element('xpath', '//div[contains(text(), "Select...")]').click()
+    driver.find_element('xpath', '//div[contains(text(), "Green")]').click()
+    driver.find_element('xpath', '//input[@id="react-select-4-input"]').send_keys(f'b{Keys.TAB}{Keys.ESCAPE}')
+    sleep(1)
 
     driver.switch_to.window(first_page)
     sleep(1)

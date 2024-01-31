@@ -1,3 +1,26 @@
+"""
+Разобрался как работает перезапись cookies
+удалять заранее не надо
+cookie определяют ключи 'name', 'domain', 'path'
+ключ 'value' является обязательным,
+проблема возникает с 'domain'
+могут быть двух видов
+www.abc.com или abc.com -> только для текущего домена
+.abc.com (точка спереди) ->для текущего домена и все поддоменов
+всё чуть сложнее тут подробности http://bayou.io/draft/cookie.domain.html
+если использовать driver.add_cookie({'name' : 'foo', 'value' : 'bar'})
+то получится www.abc.com или abc.com
+если использовать driver.add_cookie({'name' : 'foo', 'value' : 'bar', 'domain' : 'abc.com'})
+или driver.add_cookie({'name' : 'foo', 'value' : 'bar', 'domain' : '.abc.com'})
+т.е. к явному домену всегда добавляется '.', если её нет
+то получится .abc.com
+Резюме
+всегда смотрите домен в оригинальной cookie,
+чтобы не создавать копию cookie
+Инфо
+https://stackoverflow.com/questions/1062963/how-do-browser-cookie-domains-work?newreg=9029417e5e5148a2a16fa14f98d6c298
+"""
+
 from selenium import webdriver
 from selenium.common import TimeoutException
 from selenium.webdriver.chrome.webdriver import WebDriver

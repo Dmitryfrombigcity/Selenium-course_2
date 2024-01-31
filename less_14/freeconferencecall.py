@@ -9,7 +9,7 @@ www.abc.com или abc.com -> только для текущего домена
 .abc.com (точка спереди) ->для текущего домена и все поддоменов
 всё чуть сложнее тут подробности http://bayou.io/draft/cookie.domain.html
 если использовать driver.add_cookie({'name' : 'foo', 'value' : 'bar'})
-то получится www.abc.com или abc.com
+то получится www.abc.com или abc.com -> берётся название текущего домена
 если использовать driver.add_cookie({'name' : 'foo', 'value' : 'bar', 'domain' : 'abc.com'})
 или driver.add_cookie({'name' : 'foo', 'value' : 'bar', 'domain' : '.abc.com'})
 т.е. к явному домену всегда добавляется '.', если её нет

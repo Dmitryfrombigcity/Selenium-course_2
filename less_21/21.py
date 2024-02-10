@@ -1,8 +1,9 @@
 import os
 from random import choice
-from time import sleep, strftime, localtime
+from time import strftime, localtime, perf_counter
 
 from selenium import webdriver
+# import undetected_chromedriver as webdriver # just in case
 from selenium.common import TimeoutException, WebDriverException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.chrome.webdriver import WebDriver
@@ -15,11 +16,12 @@ from selenium.webdriver.support.wait import WebDriverWait
 def init_driver() -> WebDriver:
     options = webdriver.ChromeOptions()
     # service = webdriver.ChromeService(service_args=['--log-level=DEBUG'], log_output='log.txt')
-    options.add_argument(f'--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko)'
+    options.add_argument(f'--user-agent=Mozilla/5.0 (X11; Linux x86_64)'  # type: ignore
+                         f' AppleWebKit/537.36 (KHTML, like Gecko)'
                          f' Chrome/121.0.0.0 Safari/537.36')
-    options.add_argument('--disable-blink-features=AutomationControlled')
-    # options.add_argument('--headless')
-    options.add_argument('--window-size=1920,1080')
+    options.add_argument('--disable-blink-features=AutomationControlled')  # type: ignore
+    options.add_argument('--headless=new')  # type: ignore
+    options.add_argument('--window-size=1920,1080')  # type: ignore
     return webdriver.Chrome(options=options)
 
 
@@ -28,16 +30,13 @@ def select_country(
         wait: WebDriverWait[WebDriver]
 ) -> None:
     deliver_to = (
-        'xpath',
-        '//div[@id="nav-global-location-slot"]'
+        'xpath', '//div[@id="nav-global-location-slot"]'
     )
     countries_dropdown = (
-        'xpath',
-        '//select[@id="GLUXCountryList"]'
+        'xpath', '//select[@id="GLUXCountryList"]'
     )
     done_button = (
-        'xpath',
-        '//button[@class="a-button-text"]'
+        'xpath', '//button[@class="a-button-text"]'
     )
 
     try:
@@ -46,21 +45,12 @@ def select_country(
             message='deliver_to is not clickable'
         )
     except TimeoutException as err:
-        make_screenshot(
-            driver,
-            err.__class__,
-            'CAPTCHA or homepage_error'
-        )
-        print_err(
-            'CAPTCHA or homepage_error',
-            err.__class__
-        )
+        make_screenshot(driver, err, 'CAPTCHA or homepage_error')
+        print_err('CAPTCHA or homepage_error', err)
+
         driver.refresh()
     finally:
-        header_state = driver.find_element(
-            'tag name',
-            'header'
-        )
+        header_state = driver.find_element('tag name', 'header')
         wait.until(
             ec.element_to_be_clickable(deliver_to),
             message='deliver_to was not clickable twice'
@@ -72,15 +62,8 @@ def select_country(
             message='countries_dropdown failed'
         )
     except TimeoutException as err:  # sometimes this happens
-        make_screenshot(
-            driver,
-            err.__class__,
-            'deliver_to_click_err'
-        )
-        print_err(
-            'deliver_to_click_err',
-            err.__class__
-        )
+        make_screenshot(driver, err, 'deliver_to_click_err')
+        print_err('deliver_to_click_err', err)
 
         driver.find_element(*deliver_to).click()
         wait.until(
@@ -94,14 +77,24 @@ def select_country(
         ec.presence_of_element_located(done_button),
         message='done_button is no present'
     ).click()
-    wait.until(ec.staleness_of(header_state))
+    start = perf_counter()
+    print(header_state.id, driver.find_element('xpath', '//*[@id="nav-hamburger-menu"]').id)
+    wait.until(
+        ec.staleness_of(header_state),
+        message='header_state didn\'t change'
+    )
+    print(
+        perf_counter() - start,
+        driver.find_element('tag name', 'header').id,
+        driver.find_element('xpath', '//*[@id="nav-hamburger-menu"]').id
+    )
 
 
 def waiting(driver: WebDriver) -> WebDriverWait[WebDriver]:
     return WebDriverWait(
         driver=driver,
         timeout=10,
-        poll_frequency=0.1
+        poll_frequency=0.15
     )
 
 
@@ -110,24 +103,19 @@ def collect_cart(
         wait: WebDriverWait[WebDriver]
 ) -> None:
     hamburger_menu = (
-        'xpath',
-        '//*[@id="nav-hamburger-menu"]'
+        'xpath', '//*[@id="nav-hamburger-menu"]'
     )
     category_menu = (
-        'xpath',
-        '//a[@data-menu-id]'
+        'xpath', '//a[@data-menu-id]'
     )
     hmenu_compressed_btn = (
-        'xpath',
-        '//a[@class = "hmenu-item hmenu-compressed-btn"]'
+        'xpath', '//a[@class = "hmenu-item hmenu-compressed-btn"]'
     )
     subcategory_menu = (
-        'xpath',
-        '//ul[contains(@class, "hmenu-visible")]//a'
+        'xpath', '//ul[contains(@class, "hmenu-visible")]//a'
     )
     search_results = (
-        'xpath',
-        '//div[contains(@class, "search-result")]//h2/a'
+        'xpath', '//div[contains(@class, "search-result")]//h2/a'
     )
 
     # sleep(5)  # TODO: найти способ поменять на ожидание
@@ -143,50 +131,40 @@ def collect_cart(
     # script under hamburger_menu works twice
     # need to hover over hamburger_menu firstly and then click to solve it
 
-    wait.until(ec.element_to_be_clickable(hmenu_compressed_btn)).click()
+    wait.until(
+        ec.element_to_be_clickable(hmenu_compressed_btn),
+        message='hmenu_compressed_btn is not clickable'
+    ).click()
     category_lst = wait.until(
         ec.presence_of_all_elements_located(category_menu),
         message='category_menu is not present'
     )[3:25]
 
     # sometimes invalid URL -> maybe a longer delay is needed
-    click_element(
-        category_lst,
-        'categories',
-        action
-    )
-
+    click_element(category_lst, 'categories', action)
     subcategory_lst = wait.until(
         ec.visibility_of_all_elements_located(subcategory_menu),
         message='subcategory_menu is not present'
     )[1:]
-
-    click_element(
-        subcategory_lst,
-        'subcategories',
-        action
-    )
-    sleep(1)
+    click_element(subcategory_lst, 'subcategories', action)
 
     try:
-        search_results_lst = wait.until(ec.visibility_of_all_elements_located(search_results))
-
+        search_results_lst = wait.until(
+            ec.visibility_of_all_elements_located(search_results),
+            message='no_search-results'
+        )
     except WebDriverException as err:
-        make_screenshot(
-            driver,
-            err.__class__,
-            'no_search-results'
-        )
-        print_err(
-            'no_search-results',
-            err.__class__
-        )
-
+        make_screenshot(driver, err, 'no_search-results')
+        print_err('no_search-results', err)
     else:
         choice(search_results_lst).click()
-        wait.until(ec.presence_of_element_located(('xpath', '//title')))
-        print(f'######################title = {driver.title}')
-        sleep(1)
+        wait.until(
+            ec.presence_of_element_located(('xpath', '//title'))
+        )
+        print(
+            f'######################'
+            f'title = {driver.title}'
+        )
 
 
 def click_element(
@@ -195,11 +173,17 @@ def click_element(
         action: ActionChains
 ) -> None:
     lst_copy = lst[:]
-    print(f'######################{prefix}',
-          *(item.get_attribute('text') for item in lst_copy),
-          sep='\n')
     element = choice(lst_copy)
-    print(f"######################{prefix} = {element.get_attribute('text')}")
+    print(
+        f'######################'
+        f'{prefix}',
+        *(item.get_attribute('text') for item in lst_copy),
+        sep='\n'
+    )
+    print(
+        f"######################"
+        f"{prefix} = {element.get_attribute('text')}"
+    )
 
     action \
         .scroll_to_element(element) \
@@ -211,19 +195,23 @@ def click_element(
 
 def make_screenshot(
         driver: WebDriver,
-        err_class: type[WebDriverException],
+        err: WebDriverException,
         description: str
 ) -> None:
     driver.get_screenshot_as_file(
-        f'{os.getcwd()}/Errors/{strftime("%d.%m.%Y_%H:%M:%S", localtime())} > {description}_{err_class}.png'
+        f'{os.getcwd()}/Errors/{strftime("%d.%m.%Y_%H:%M:%S", localtime())}> {description}> {err.msg}.png'
     )
 
 
 def print_err(
         title: str,
-        err_class: type[WebDriverException]
+        err: WebDriverException
 ) -> None:
-    print(f'######################{title} {err_class}', sep='\n')
+    print(
+        f'######################'
+        f'{title}> {err.__class__.__name__}> {err.msg}',
+        sep='\n'
+    )
 
 
 def main() -> None:
@@ -235,24 +223,11 @@ def main() -> None:
             driver.set_page_load_timeout(30)
             try:
                 driver.get(url)
-                select_country(
-                    driver,
-                    wait
-                )
-                collect_cart(
-                    driver,
-                    wait
-                )
+                select_country(driver, wait)
+                collect_cart(driver, wait)
             except WebDriverException as err:
-                make_screenshot(
-                    driver,
-                    err.__class__,
-                    'critical_error'
-                )
-                print_err(
-                    'critical_error',
-                    err.__class__
-                )
+                make_screenshot(driver, err, 'critical_error')
+                print_err('critical_error', err)
 
 
 if __name__ == '__main__':

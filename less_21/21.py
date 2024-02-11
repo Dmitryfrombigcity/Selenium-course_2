@@ -1,6 +1,6 @@
 import os
 from random import choice
-from time import strftime, localtime, perf_counter
+from time import strftime, localtime, perf_counter, sleep
 
 from selenium import webdriver
 # import undetected_chromedriver as webdriver # just in case
@@ -13,6 +13,10 @@ from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
 
 
+class Captcha(WebDriverException):
+    pass
+
+
 def init_driver() -> WebDriver:
     options = webdriver.ChromeOptions()
     # service = webdriver.ChromeService(service_args=['--log-level=DEBUG'], log_output='log.txt')
@@ -20,7 +24,7 @@ def init_driver() -> WebDriver:
                          f' AppleWebKit/537.36 (KHTML, like Gecko)'
                          f' Chrome/121.0.0.0 Safari/537.36')
     options.add_argument('--disable-blink-features=AutomationControlled')  # type: ignore
-    options.add_argument('--headless=new')  # type: ignore
+    # options.add_argument('--headless=new')  # type: ignore
     options.add_argument('--window-size=1920,1080')  # type: ignore
     return webdriver.Chrome(options=options)
 
@@ -39,18 +43,22 @@ def select_country(
         'xpath', '//button[@class="a-button-text"]'
     )
 
+    header = (
+        'tag name', 'header'
+    )
     try:
         wait.until(
             ec.element_to_be_clickable(deliver_to),
             message='deliver_to is not clickable'
         )
     except TimeoutException as err:
-        make_screenshot(driver, err, 'CAPTCHA or homepage_error')
-        print_err('CAPTCHA or homepage_error', err)
-
+        make_screenshot(driver, err, 'homepage_error')
+        print_err('homepage_error', err)
         driver.refresh()
     finally:
-        header_state = driver.find_element('tag name', 'header')
+        header_state = wait.until(
+            ec.presence_of_element_located(header)
+        )
         wait.until(
             ec.element_to_be_clickable(deliver_to),
             message='deliver_to was not clickable twice'
@@ -78,15 +86,14 @@ def select_country(
         message='done_button is no present'
     ).click()
     start = perf_counter()
-    print(header_state.id, driver.find_element('xpath', '//*[@id="nav-hamburger-menu"]').id)
+    print(header_state.id)
     wait.until(
         ec.staleness_of(header_state),
         message='header_state didn\'t change'
     )
     print(
         perf_counter() - start,
-        driver.find_element('tag name', 'header').id,
-        driver.find_element('xpath', '//*[@id="nav-hamburger-menu"]').id
+        driver.find_element(*header).id
     )
 
 
@@ -94,7 +101,7 @@ def waiting(driver: WebDriver) -> WebDriverWait[WebDriver]:
     return WebDriverWait(
         driver=driver,
         timeout=10,
-        poll_frequency=0.15
+        poll_frequency=0.5
     )
 
 
@@ -116,6 +123,9 @@ def collect_cart(
     )
     search_results = (
         'xpath', '//div[contains(@class, "search-result")]//h2/a'
+    )
+    title = (
+        'xpath', '//title'
     )
 
     # sleep(5)  # TODO: найти способ поменять на ожидание
@@ -159,7 +169,7 @@ def collect_cart(
     else:
         choice(search_results_lst).click()
         wait.until(
-            ec.presence_of_element_located(('xpath', '//title'))
+            ec.presence_of_element_located(title)
         )
         print(
             f'######################'
@@ -174,6 +184,20 @@ def click_element(
 ) -> None:
     lst_copy = lst[:]
     element = choice(lst_copy)
+    print_items(lst_copy, prefix, element)
+    action \
+        .move_to_element(element) \
+        .pause(3) \
+        .click(element) \
+        .pause(3) \
+        .perform()
+
+
+def print_items(
+        lst_copy: list[WebElement],
+        prefix: str,
+        element: [WebElement]
+) -> None:
     print(
         f'######################'
         f'{prefix}',
@@ -184,13 +208,6 @@ def click_element(
         f"######################"
         f"{prefix} = {element.get_attribute('text')}"
     )
-
-    action \
-        .scroll_to_element(element) \
-        .pause(2) \
-        .click(element) \
-        .pause(2) \
-        .perform()
 
 
 def make_screenshot(
@@ -214,6 +231,20 @@ def print_err(
     )
 
 
+def check_captcha(
+        driver: WebDriver,
+        wait: WebDriverWait[WebDriver]
+) -> None:
+    h4 = (
+        'tag name', 'h4'
+    )
+    if wait.until(ec.presence_of_element_located(h4)).text == 'Enter the characters you see below':
+        make_screenshot(driver, Captcha('it happened'), 'CAPTCHA')
+        print_err('CAPTCHA', Captcha('it happened'))
+        sleep(3)
+        driver.refresh()
+
+
 def main() -> None:
     url = 'https://www.amazon.com/'
     for _ in range(20):
@@ -223,6 +254,7 @@ def main() -> None:
             driver.set_page_load_timeout(30)
             try:
                 driver.get(url)
+                check_captcha(driver, wait)
                 select_country(driver, wait)
                 collect_cart(driver, wait)
             except WebDriverException as err:

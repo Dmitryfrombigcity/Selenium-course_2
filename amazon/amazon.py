@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 from random import choice
-from time import strftime, localtime, sleep
+from time import sleep
 
 # import undetected_chromedriver as webdriver # just in case
 from selenium.common.exceptions import TimeoutException, WebDriverException
@@ -13,10 +13,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from browser import Browser
 from locators import Locators
-
-
-def reset_cookies() -> None:
-    (Path.cwd() / 'Cookies/cookies.json').unlink(missing_ok=True)
+from utils import print_items, make_screenshot, print_err,reset_cookies
 
 
 class Captcha(WebDriverException):
@@ -35,8 +32,8 @@ class Page:
                 message='deliver_to is not clickable'
             )
         except TimeoutException as err:
-            self.make_screenshot(err, 'homepage_error')
-            self.print_err('homepage_error', err)
+            make_screenshot(err, 'homepage_error', self.driver)
+            print_err('homepage_error', err)
             self.driver.refresh()
         finally:
             header_state = self.wait.until(
@@ -53,8 +50,8 @@ class Page:
                 message='countries_dropdown failed'
             )
         except TimeoutException as err:  # sometimes this happens
-            self.make_screenshot(err, 'deliver_to_click_err')
-            self.print_err('deliver_to_click_err', err)
+            make_screenshot(err, 'deliver_to_click_err', self.driver)
+            print_err('deliver_to_click_err', err)
 
             self.driver.find_element(*Locators.deliver_to).click()
             self.wait.until(
@@ -105,8 +102,8 @@ class Page:
             )[1:]
             self.click_element(subcategory_lst, 'subcategor', action)
         except TimeoutException as err:
-            self.make_screenshot(err, 'category/subcategory')
-            self.print_err('category/subcategory', err)
+            make_screenshot(err, 'category/subcategory', self.driver)
+            print_err('category/subcategory', err)
             self.driver.refresh()
         else:
             try:
@@ -115,8 +112,8 @@ class Page:
                     message='no_search-results'
                 )
             except WebDriverException as err:
-                self.make_screenshot(err, 'no_search-results')
-                self.print_err('no_search-results', err)
+                make_screenshot(err, 'no_search-results', self.driver)
+                print_err('no_search-results', err)
                 self.driver.refresh()
             else:
                 choice(search_results_lst).click()
@@ -137,17 +134,17 @@ class Page:
             ).click()
 
         except TimeoutException as err:
-            self.make_screenshot(err, 'add_to_cart is not selectable')
-            self.print_err('add_to_cart is not selectable', err)
+            make_screenshot(err, 'add_to_cart is not selectable', self.driver)
+            print_err('add_to_cart is not selectable', err)
 
-    def click_element(self,
-                      lst: list[WebElement],
+    @staticmethod
+    def click_element(lst: list[WebElement],
                       prefix: str,
                       action: ActionChains
                       ) -> None:
         lst_copy = lst[:]
         element = choice(lst_copy)
-        self.print_items(lst_copy, prefix, element)
+        print_items(lst_copy, prefix, element)
         action \
             .move_to_element(element) \
             .pause(1.5) \
@@ -155,48 +152,11 @@ class Page:
             .pause(3) \
             .perform()
 
-    @staticmethod
-    def print_items(lst_copy: list[WebElement],
-                    prefix: str,
-                    element: WebElement
-                    ) -> None:
-        print(
-            f'######################'
-            f'{prefix}ies',
-            *(item.get_attribute('text') for item in lst_copy),
-            sep='\n'
-        )
-        print(
-            f"######################"
-            f"{prefix}y = {element.get_attribute('text')}"
-        )
-
-    def make_screenshot(
-            self,
-            err: WebDriverException,
-            description: str
-    ) -> None:
-        if not (Path.cwd() / 'Errors').exists():
-            (Path.cwd() / 'Errors').mkdir()
-        self.driver.get_screenshot_as_file(
-            f'{Path.cwd()}/Errors/{strftime("%d.%m.%Y_%H:%M:%S", localtime())}> {description}> {err.msg}.png'
-        )
-
-    @staticmethod
-    def print_err(title: str,
-                  err: WebDriverException
-                  ) -> None:
-        print(
-            f'######################'
-            f'{strftime("%d.%m.%Y_%H:%M:%S", localtime())}> {title}> {err.__class__.__name__}> {err.msg}',
-            sep='\n'
-        )
-
     def check_captcha(self):
         try:  # TODO: Refactor it -> fixed
             self.wait.until(ec.presence_of_element_located(Locators.captcha))
-            self.make_screenshot(Captcha('it happened'), 'CAPTCHA')
-            self.print_err('CAPTCHA', Captcha('it happened'))
+            make_screenshot(Captcha('it happened'), 'CAPTCHA', self.driver)
+            print_err('CAPTCHA', Captcha('it happened'))
             sleep(3)
             self.driver.refresh()
         except TimeoutException:
@@ -244,24 +204,24 @@ class Page:
 def main() -> None:
     url = 'https://www.amazon.com/'
 
-    # reset_cookies()
-    # for _ in range(2):
-    #     page = Page()
-    #     print('', f'######################Starting', sep='\n')
-    #     try:
-    #         page.driver.get(url)
-    #         page.check_captcha()
-    #         page.select_country()
-    #         for _ in range(3):
-    #             page.collect_cart()
-    #         page.collect_cookies()
-    #         sleep(3)
-    #     except WebDriverException as err:
-    #         page.make_screenshot(err, 'critical_error')
-    #         page.print_err('critical_error', err)
-    page = Page()
-    page.driver.get(url)
-    page.apply_cookies()
+    reset_cookies()
+    for _ in range(2):
+        page = Page()
+        print('', f'######################Starting', sep='\n')
+        try:
+            page.driver.get(url)
+            page.check_captcha()
+            page.select_country()
+            for _ in range(3):
+                page.collect_cart()
+            page.collect_cookies()
+            sleep(3)
+        except WebDriverException as err:
+            make_screenshot(err, 'critical_error', page.driver)
+            print_err('critical_error', err)
+    # page = Page()
+    # page.driver.get(url)
+    # page.apply_cookies()
 
 
 if __name__ == '__main__':

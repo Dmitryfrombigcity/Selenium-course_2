@@ -12,12 +12,9 @@ from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
 
 from browser import Browser
+from exceptions import Captcha
 from locators import Locators
-from utils import print_items, make_screenshot, print_err,reset_cookies
-
-
-class Captcha(WebDriverException):
-    pass
+from utils import print_items, make_screenshot, print_err, reset_cookies
 
 
 class Page:

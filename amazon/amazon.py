@@ -3,7 +3,6 @@ from pathlib import Path
 from random import choice
 from time import strftime, localtime, sleep
 
-from selenium import webdriver
 # import undetected_chromedriver as webdriver # just in case
 from selenium.common.exceptions import TimeoutException, WebDriverException
 from selenium.webdriver import ActionChains
@@ -12,6 +11,7 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
 
+from browser import Browser
 from locators import Locators
 
 
@@ -25,18 +25,8 @@ class Captcha(WebDriverException):
 
 class Page:
     def __init__(self):
-        options = webdriver.ChromeOptions()
-        # service = webdriver.ChromeService(service_args=['--log-level=DEBUG'], log_output='log.txt')
-        options.add_argument(f'--user-agent=Mozilla/5.0 (X11; Linux x86_64)'  # type: ignore
-                             f' AppleWebKit/537.36 (KHTML, like Gecko)'
-                             f' Chrome/121.0.0.0 Safari/537.36')
-        options.add_argument('--disable-blink-features=AutomationControlled')  # type: ignore
-        # options.add_argument('--headless=new')  # type: ignore
-        options.add_argument('--window-size=1920,1080')  # type: ignore
-        options.add_experimental_option("excludeSwitches", ['enable-automation'])  # type: ignore
-        self.driver = webdriver.Chrome(options=options)
+        self.driver = Browser.driver
         self.wait = WebDriverWait(driver=self.driver, timeout=10, poll_frequency=0.5)
-        self.driver.set_page_load_timeout(30)
 
     def select_country(self):
         try:

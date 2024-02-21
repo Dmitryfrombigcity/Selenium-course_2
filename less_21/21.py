@@ -238,11 +238,14 @@ def check_captcha(
     h4 = (
         'tag name', 'h4'
     )
-    if wait.until(ec.presence_of_element_located(h4)).text == 'Enter the characters you see below':
-        make_screenshot(driver, Captcha('it happened'), 'CAPTCHA')
-        print_err('CAPTCHA', Captcha('it happened'))
-        sleep(3)
-        driver.refresh()
+    try:  # TODO: Refactor it
+        if wait.until(ec.presence_of_element_located(h4)).text == 'Enter the characters you see below':
+            make_screenshot(driver, Captcha('it happened'), 'CAPTCHA')
+            print_err('CAPTCHA', Captcha('it happened'))
+            sleep(3)
+            driver.refresh()
+    except TimeoutException:
+        pass
 
 
 def main() -> None:

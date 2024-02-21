@@ -6,10 +6,12 @@ from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 
 
-def print_items(lst_copy: list[WebElement],
-                prefix: str,
-                element: WebElement
-                ) -> None:
+def print_items(
+        lst_copy: list[WebElement],
+        prefix: str,
+        element: WebElement
+) -> None:
+
     print(
         f'######################'
         f'{prefix}ies',
@@ -27,16 +29,20 @@ def make_screenshot(
         description: str,
         driver: WebDriver
 ) -> None:
+
     if not (Path.cwd() / 'Errors').exists():
         (Path.cwd() / 'Errors').mkdir()
+
     driver.get_screenshot_as_file(
         f'{Path.cwd()}/Errors/{strftime("%d.%m.%Y_%H:%M:%S", localtime())}> {description}> {err.msg}.png'
     )
 
 
-def print_err(title: str,
-              err: WebDriverException
-              ) -> None:
+def print_err(
+        title: str,
+        err: WebDriverException
+) -> None:
+
     print(
         f'######################'
         f'{strftime("%d.%m.%Y_%H:%M:%S", localtime())}> {title}> {err.__class__.__name__}> {err.msg}',

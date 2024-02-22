@@ -6,6 +6,7 @@ from time import sleep
 # import undetected_chromedriver as webdriver # just in case
 from selenium.common.exceptions import TimeoutException, WebDriverException
 from selenium.webdriver import ActionChains
+from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.select import Select
@@ -17,10 +18,62 @@ from locators import Locators
 from utils import print_items, make_screenshot, print_err, reset_cookies
 
 
-class Page:
-    def __init__(self):
-        self.driver = Browser.driver
-        self.wait = WebDriverWait(driver=self.driver, timeout=10, poll_frequency=0.5)
+class Base:
+    def __init__(
+            self,
+            url: str,
+            timeout: float = 10,
+            poll_frequency: float = 0.1
+    ) -> None:
+        self.url = url
+        self._timeout = timeout
+        self._poll_frequency = poll_frequency
+        self._driver: WebDriver = Browser().driver
+        self.__sets()
+
+    def __sets(self):
+        self.action: ActionChains = ActionChains(self._driver)
+        self.wait: WebDriverWait = WebDriverWait(
+            driver=self._driver,
+            timeout=self._timeout,
+            poll_frequency=self._poll_frequency
+        )
+
+    @property
+    def driver(self) -> WebDriver:
+        return self._driver
+
+    @driver.setter
+    def driver(self, value: WebDriver) -> None:
+        self.driver.close()
+        self._driver = value
+        self.__sets()
+
+    def get_page(self) -> None:
+        self.driver.get(self.url)
+        sleep(1)
+
+    def presence_of_element(
+            self,
+            locator: tuple[str, str],
+            error: str = '',
+            timeout: float | None = None
+    ) -> WebElement:
+
+        if timeout is None:
+            timeout = self._timeout
+
+        return WebDriverWait(
+            self.driver,
+            timeout,
+            self._poll_frequency,
+        ).until(
+            ec.presence_of_element_located(locator=locator),
+            message=error
+        )
+
+
+class Page(Base):
 
     def select_country(self):
         try:
@@ -33,34 +86,32 @@ class Page:
             print_err('homepage_error', err)
             self.driver.refresh()
         finally:
-            header_state = self.wait.until(
-                ec.presence_of_element_located(Locators.header)
-            )
+            header_state = self.presence_of_element(Locators.header)
             self.wait.until(
                 ec.element_to_be_clickable(Locators.deliver_to),
                 message='deliver_to was not clickable twice'
             ).click()
 
         try:
-            self.wait.until(
-                ec.presence_of_element_located(Locators.countries_dropdown),
-                message='countries_dropdown failed'
+            self.presence_of_element(
+                Locators.countries_dropdown,
+                error='countries_dropdown failed'
             )
         except TimeoutException as err:  # sometimes this happens
             make_screenshot(err, 'deliver_to_click_err', self.driver)
             print_err('deliver_to_click_err', err)
 
             self.driver.find_element(*Locators.deliver_to).click()
-            self.wait.until(
-                ec.presence_of_element_located(Locators.countries_dropdown),
-                message='countries_dropdown failed twice'
+            self.presence_of_element(
+                Locators.countries_dropdown,
+                error='countries_dropdown failed twice'
             )
 
         dropdown = Select(self.driver.find_element(*Locators.countries_dropdown))
         dropdown.select_by_visible_text(choice(dropdown.options).text)
-        self.wait.until(
-            ec.presence_of_element_located(Locators.done_button),
-            message='done_button is no present'
+        self.presence_of_element(
+            Locators.done_button,
+            error='done_button is no present'
         ).click()
         self.wait.until(
             ec.staleness_of(header_state),
@@ -72,8 +123,7 @@ class Page:
         # sleep(5)  # найти способ поменять на ожидание
         #  -> solved by wait.until(ec.staleness_of(header_state))
 
-        action = ActionChains(self.driver)
-        action \
+        self.action \
             .move_to_element(self.driver.find_element(*Locators.hamburger_menu)) \
             .click(self.driver.find_element(*Locators.hamburger_menu)) \
             .perform()
@@ -92,12 +142,12 @@ class Page:
                 message='category_menu is not present'
             )[3:25]
             # sometimes invalid URL -> maybe a longer delay is needed
-            self.click_element(category_lst, 'categor', action)
+            self.click_element(category_lst, 'categor')
             subcategory_lst = self.wait.until(
                 ec.visibility_of_all_elements_located(Locators.menu),
                 message='subcategory_menu is not present'
             )[1:]
-            self.click_element(subcategory_lst, 'subcategor', action)
+            self.click_element(subcategory_lst, 'subcategor')
         except TimeoutException as err:
             make_screenshot(err, 'category/subcategory', self.driver)
             print_err('category/subcategory', err)
@@ -117,9 +167,7 @@ class Page:
                 self.add_good()
 
     def add_good(self):
-        self.wait.until(
-            ec.presence_of_element_located(Locators.title)
-        )
+        self.presence_of_element(Locators.title)
         try:
             print(
                 f'######################'
@@ -134,15 +182,15 @@ class Page:
             make_screenshot(err, 'add_to_cart is not selectable', self.driver)
             print_err('add_to_cart is not selectable', err)
 
-    @staticmethod
-    def click_element(lst: list[WebElement],
-                      prefix: str,
-                      action: ActionChains
-                      ) -> None:
+    def click_element(
+            self,
+            lst: list[WebElement],
+            prefix: str
+    ) -> None:
         lst_copy = lst[:]
         element = choice(lst_copy)
         print_items(lst_copy, prefix, element)
-        action \
+        self.action \
             .move_to_element(element) \
             .pause(1.5) \
             .click(element) \
@@ -150,8 +198,8 @@ class Page:
             .perform()
 
     def check_captcha(self):
-        try:  # TODO: Refactor it -> fixed
-            self.wait.until(ec.presence_of_element_located(Locators.captcha))
+        try:
+            self.presence_of_element(Locators.captcha, timeout=1.0)
             make_screenshot(Captcha('it happened'), 'CAPTCHA', self.driver)
             print_err('CAPTCHA', Captcha('it happened'))
             sleep(3)
@@ -160,9 +208,7 @@ class Page:
             pass
 
     def collect_cookies(self):
-        self.wait.until(
-            ec.presence_of_element_located(Locators.title)
-        )
+        self.presence_of_element(Locators.title)
 
         if not (Path.cwd() / 'Cookies').exists():
             (Path.cwd() / 'Cookies').mkdir()
@@ -180,8 +226,7 @@ class Page:
     def apply_cookies(self):
         with open(Path.cwd() / 'Cookies/cookies.json', 'r', encoding='utf-8') as file:
             cookies_lst = json.load(file)
-        self.driver.get('https://www.amazon.com/cart/')
-        sleep(2.5)
+        # sleep(2.5)
         for cookies in cookies_lst:
             for cookie in cookies:
                 self.driver.add_cookie(self.convert_cookie(cookie))
@@ -199,14 +244,13 @@ class Page:
 
 
 def main() -> None:
-    url = 'https://www.amazon.com/'
-
     reset_cookies()
+    page = Page('https://www.amazon.com/')
     for _ in range(2):
-        page = Page()
         print('', f'######################Starting', sep='\n')
         try:
-            page.driver.get(url)
+            page.driver = Browser().driver
+            page.get_page()
             page.check_captcha()
             page.select_country()
             for _ in range(3):
@@ -216,9 +260,9 @@ def main() -> None:
         except WebDriverException as err:
             make_screenshot(err, 'critical_error', page.driver)
             print_err('critical_error', err)
-    # page = Page()
-    # page.driver.get(url)
-    # page.apply_cookies()
+    page = Page('https://www.amazon.com/cart/')
+    page.get_page()
+    page.apply_cookies()
 
 
 if __name__ == '__main__':

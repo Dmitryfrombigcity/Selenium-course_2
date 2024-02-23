@@ -11,7 +11,6 @@ def print_items(
         prefix: str,
         element: WebElement
 ) -> None:
-
     print(
         f'######################'
         f'{prefix}ies',
@@ -24,12 +23,29 @@ def print_items(
     )
 
 
+def print_title(driver: WebDriver) -> None:
+    print(
+        f'######################'
+        f'title = {driver.title}',
+        '',
+        sep='\n'
+    )
+
+
+def print_start() -> None:
+    print(
+        '',
+        f'######################'
+        f'Starting',
+        sep='\n'
+    )
+
+
 def make_screenshot(
         err: WebDriverException,
         description: str,
         driver: WebDriver
 ) -> None:
-
     if not (Path.cwd() / 'Errors').exists():
         (Path.cwd() / 'Errors').mkdir()
 
@@ -42,7 +58,6 @@ def print_err(
         title: str,
         err: WebDriverException
 ) -> None:
-
     print(
         f'######################'
         f'{strftime("%d.%m.%Y_%H:%M:%S", localtime())}> {title}> {err.__class__.__name__}> {err.msg}',

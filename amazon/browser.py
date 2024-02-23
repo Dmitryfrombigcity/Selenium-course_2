@@ -1,9 +1,11 @@
 from selenium import webdriver
 
 
-class Browser:
-    def __init__(self):
+# import undetected_chromedriver as webdriver # just in case
 
+
+class Browser:
+    def __init__(self) -> None:
         options = webdriver.ChromeOptions()
         options.add_argument(f'--user-agent=Mozilla/5.0 (X11; Linux x86_64)'  # type: ignore
                              f' AppleWebKit/537.36 (KHTML, like Gecko)'
@@ -12,6 +14,6 @@ class Browser:
         # options.add_argument('--headless=new')  # type: ignore
         # service = webdriver.ChromeService(service_args=['--log-level=DEBUG'], log_output='log.txt') # type: ignore
         options.add_argument('--window-size=1920,1080')  # type: ignore
-        options.add_experimental_option("excludeSwitches", ['enable-automation'])  # type: ignore
+        options.add_experimental_option("excludeSwitches", ['enable-automation'])
         self.driver = webdriver.Chrome(options=options)
         self.driver.set_page_load_timeout(30)

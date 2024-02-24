@@ -190,24 +190,24 @@ class Page(Base):
 
 def main() -> None:
     reset_cookies()
-    page = Page('https://www.amazon.com/')
-    for _ in range(2):
-        print_start()
-        try:
-            page.driver = Browser().driver
-            page.get_page()
-            page.check_captcha()
-            page.select_country()
-            for _ in range(3):
-                page.collect_cart()
-            page.collect_cookies()
-            sleep(3)
-        except WebDriverException as err:
-            make_screenshot(err, 'critical_error', page.driver)
-            print_err('critical_error', err)
-    page = Page('https://www.amazon.com/cart/')
-    page.get_page()
-    page.apply_cookies()
+    with Page('https://www.amazon.com/') as page:
+        for _ in range(3):
+            print_start()
+            try:
+                page.driver = Browser().driver
+                page.get_page()
+                page.check_captcha()
+                page.select_country()
+                for _ in range(3):
+                    page.collect_cart()
+                page.collect_cookies()
+                sleep(3)
+            except WebDriverException as err:
+                make_screenshot(err, 'critical_error', page.driver)
+                print_err('critical_error', err)
+    with Page('https://www.amazon.com/cart/') as page:
+        page.get_page()
+        page.apply_cookies()
 
 
 if __name__ == '__main__':

@@ -8,11 +8,10 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.select import Select
 
 from base import Base
-from browser import Browser
 from exceptions import Captcha
 from locators import Locators
 from utils import (print_items, make_screenshot, print_err,
-                   reset_cookies, print_title, print_start)
+                   print_title)
 
 
 class Page(Base):
@@ -186,29 +185,3 @@ class Page(Base):
             (Path.cwd() / 'Cookies').mkdir()
         if not (Path.cwd() / 'Cookies/cookies.json').exists():
             (Path.cwd() / 'Cookies/cookies.json').touch()
-
-
-def main() -> None:
-    reset_cookies()
-    with Page('https://www.amazon.com/') as page:
-        for _ in range(3):
-            print_start()
-            try:
-                page.driver = Browser().driver
-                page.get_page()
-                page.check_captcha()
-                page.select_country()
-                for _ in range(3):
-                    page.collect_cart()
-                page.collect_cookies()
-                sleep(3)
-            except WebDriverException as err:
-                make_screenshot(err, 'critical_error', page.driver)
-                print_err('critical_error', err)
-    with Page('https://www.amazon.com/cart/') as page:
-        page.get_page()
-        page.apply_cookies()
-
-
-if __name__ == '__main__':
-    main()

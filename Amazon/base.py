@@ -1,4 +1,5 @@
 from time import sleep
+from typing import TypeVar
 
 from selenium.webdriver import ActionChains
 from selenium.webdriver.chrome.webdriver import WebDriver
@@ -7,6 +8,8 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
 
 from browser import Browser
+
+T = TypeVar('T')
 
 
 class Base:
@@ -21,10 +24,10 @@ class Base:
         self._poll_frequency = poll_frequency
         self.driver: WebDriver = Browser().driver
 
-    def __enter__(self):
+    def __enter__(self: T) -> T:
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         self._driver.close()
 
     @property

@@ -15,8 +15,11 @@ from utils import (print_items, make_screenshot, print_err,
 
 
 class Page(Base):
+    """ Основной класс для работы с сайтом."""
 
     def select_country(self) -> None:
+        """ Выбирает страну для доставки."""
+
         try:
             self.element_is_clickable(
                 Locators.deliver_to,
@@ -63,6 +66,8 @@ class Page(Base):
         )
 
     def collect_cart(self) -> None:
+        """Собирает товары в корзину."""
+
         self.action \
             .move_to_element(self.presence_of_element(Locators.hamburger_menu)) \
             .click(self.presence_of_element(Locators.hamburger_menu)) \
@@ -110,6 +115,8 @@ class Page(Base):
                 self._add_good()
 
     def collect_cookies(self) -> None:
+        """Собирает cookies в файл."""
+
         self.presence_of_element(Locators.title)
         self._check_cookies_file()
 
@@ -122,6 +129,8 @@ class Page(Base):
             json.dump(cookies, file, ensure_ascii=False, indent=4)
 
     def apply_cookies(self) -> None:
+        """Считывает cookies из файла и применяет их."""
+
         with open(Path.cwd() / 'Cookies/cookies.json', 'r', encoding='utf-8') as file:
             cookies_lst = json.load(file)
 
@@ -133,6 +142,7 @@ class Page(Base):
             sleep(3)
 
     def check_captcha(self) -> None:
+        """Проверяет наличие CAPTCHA."""
         try:
             self.presence_of_element(Locators.captcha, timeout=1)
             make_screenshot(Captcha('it happened'), 'CAPTCHA', self.driver)
@@ -143,6 +153,8 @@ class Page(Base):
             pass
 
     def _add_good(self) -> None:
+        """Добавляет товар в корзину."""
+
         self.presence_of_element(Locators.title)
         try:
             print_title(self.driver)
@@ -161,6 +173,13 @@ class Page(Base):
             lst: list[WebElement],
             prefix: str
     ) -> None:
+        """
+        Нажимает на элементы в выпадающем меню.
+
+        :param lst: Список элементов в меню.
+        :param prefix: Описание меню.
+        """
+
         lst_copy = lst[:]
         element = choice(lst_copy)
         print_items(lst_copy, prefix, element)
@@ -173,6 +192,14 @@ class Page(Base):
 
     @staticmethod
     def _convert_cookie(cookie: dict[str, str]) -> dict[str, str]:
+        """
+        Проверяет начинается ли cookie['domain'] с '.',
+        если начинается, то удаляет этот ключ.
+
+        :param cookie: Cookie для проверки.
+        :return: Cookie после проверки.
+        """
+
         if temp := cookie.get('domain'):
             if temp[0] != '.':
                 del cookie['domain']
@@ -181,6 +208,8 @@ class Page(Base):
 
     @staticmethod
     def _check_cookies_file() -> None:
+        """Проверяет наличие файла Cookies/cookies.json в рабочем каталоге. """
+
         if not (Path.cwd() / 'Cookies').exists():
             (Path.cwd() / 'Cookies').mkdir()
         if not (Path.cwd() / 'Cookies/cookies.json').exists():

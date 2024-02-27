@@ -9,9 +9,16 @@ from utils import (make_screenshot, print_err,
 
 
 def collect_data(
-        quantity_of_countries: int = 3,
-        quantity_of_purchases: int = 3
+        quantity_of_countries: int = 20,
+        quantity_of_purchases: int = 5
 ) -> None:
+    """
+    Собирает корзины товаров и записывает cookies в файл.
+
+    :param quantity_of_countries: Количество стран.
+    :param quantity_of_purchases: Количество попыток покупок для одной страны.
+    :return:
+    """
 
     reset_cookies()
     with Page('https://www.amazon.com/') as page:
@@ -32,11 +39,13 @@ def collect_data(
 
 
 def show_data() -> None:
+    """Показывает корзину товаров для каждой страны."""
+
     with Page('https://www.amazon.com/cart/') as page:
         page.get_page()
         page.apply_cookies()
 
 
 if __name__ == '__main__':
-    collect_data()
+    #collect_data()
     show_data()

@@ -13,6 +13,8 @@ T = TypeVar('T')
 
 
 class Base:
+    """Класс с базовыми методами."""
+
     def __init__(
             self,
             url: str,

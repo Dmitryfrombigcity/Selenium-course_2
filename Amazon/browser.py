@@ -5,6 +5,8 @@ from selenium import webdriver
 
 
 class Browser:
+    """Класс для инициализации браузера."""
+
     def __init__(self) -> None:
         options = webdriver.ChromeOptions()
         options.add_argument(f'--user-agent=Mozilla/5.0 (X11; Linux x86_64)'  # type: ignore

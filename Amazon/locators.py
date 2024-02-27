@@ -1,4 +1,6 @@
 class Locators:
+    """Основные локаторы для сайта."""
+
     deliver_to = 'xpath', '//div[@id="nav-global-location-slot"]'
     countries_dropdown = 'xpath', '//select[@id="GLUXCountryList"]'
     done_button = 'xpath', '//button[@class="a-button-text"]'

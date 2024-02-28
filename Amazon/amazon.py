@@ -23,7 +23,8 @@ class Page(Base):
         try:
             self.element_is_clickable(
                 Locators.deliver_to,
-                error='deliver_to is not clickable'
+                error='deliver_to is not clickable',
+                timeout=3
             )
         except TimeoutException as err:
             make_screenshot(err, 'homepage_error', self.driver)
@@ -60,10 +61,19 @@ class Page(Base):
             error='done_button is no present'
         ).click()
 
-        self.element_is_stale(
-            header_state,
-            error='header_state didn\'t change'
-        )
+        try:
+            self.element_is_stale(
+                header_state,
+                error='header_state didn\'t change'
+            )
+        except TimeoutException as err:  # sometimes this happens
+            make_screenshot(err, 'country not selected', self.driver)
+            print_err('country not selected', err)
+            self.driver.refresh()
+            self.element_is_stale(
+                header_state,
+                error='header_state didn\'t change'
+            )
 
     def collect_cart(self) -> None:
         """Собирает товары в корзину."""

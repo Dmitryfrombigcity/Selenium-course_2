@@ -47,5 +47,5 @@ def show_data() -> None:
 
 
 if __name__ == '__main__':
-    #collect_data()
+    collect_data()
     show_data()

@@ -4,6 +4,7 @@ class Locators:
     deliver_to = 'xpath', '//div[@id="nav-global-location-slot"]'
     countries_dropdown = 'xpath', '//select[@id="GLUXCountryList"]'
     done_button = 'xpath', '//button[@class="a-button-text"]'
+    continue_button = 'xpath', '//input[@class="a-button-input"]'
     header = 'tag name', 'header'
     hamburger_menu = 'xpath', '//*[@id="nav-hamburger-menu"]'
     menu = 'xpath', '//ul[contains(@class, "hmenu-visible")]//a'

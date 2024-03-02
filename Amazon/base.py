@@ -8,6 +8,7 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
 
 from browser import Browser
+from utils import delete_profile
 
 T = TypeVar('T')
 
@@ -31,6 +32,7 @@ class Base:
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         self._driver.close()
+        delete_profile()
 
     @property
     def driver(self) -> WebDriver:
@@ -38,6 +40,7 @@ class Base:
 
     @driver.setter
     def driver(self, value: WebDriver) -> None:
+        sleep(5)
         self._driver = value
         self.action = ActionChains(self._driver)
 

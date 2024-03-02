@@ -50,7 +50,8 @@ def make_screenshot(
         (Path.cwd() / 'Errors').mkdir()
 
     driver.get_screenshot_as_file(
-        f'{Path.cwd()}/Errors/{strftime("%d.%m.%Y_%H:%M:%S", localtime())}> {description}> {err.msg[:50]}.png'
+        f'{Path.cwd()}/Errors/{strftime("%d.%m.%Y_%H:%M:%S", localtime())}> {description}>'
+        f' {tmp[:50] if isinstance(tmp := err.msg, str) else tmp}.png'
     )
 
 
@@ -67,3 +68,14 @@ def print_err(
 
 def reset_cookies() -> None:
     (Path.cwd() / 'Cookies/cookies.json').unlink(missing_ok=True)
+
+
+def delete_profile(
+        path: Path = (Path.cwd() / 'Profile')
+) -> None:
+    for item in path.iterdir():
+        if item.is_dir():
+            delete_profile(item)
+        else:
+            item.unlink()
+    path.rmdir()

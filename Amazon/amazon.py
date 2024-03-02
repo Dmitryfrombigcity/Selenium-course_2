@@ -37,12 +37,13 @@ class Page(Base):
                 error='deliver_to was not clickable twice'
             ).click()
 
+        # sometimes this happens
         try:
             self.presence_of_element(
                 Locators.countries_dropdown,
                 error='countries_dropdown failed'
             )
-        except TimeoutException as err:  # sometimes this happens
+        except TimeoutException as err:
             make_screenshot(err, 'deliver_to_click_err', self.driver)
             print_err('deliver_to_click_err', err)
 
@@ -55,25 +56,35 @@ class Page(Base):
         dropdown = Select(
             self.presence_of_element(Locators.countries_dropdown)
         )
-        dropdown.select_by_visible_text(choice(dropdown.options).text)
-        self.presence_of_element(
-            Locators.done_button,
-            error='done_button is no present'
-        ).click()
+
+        # dropdown.select_by_visible_text('American Samoa')
+
+        dropdown.select_by_visible_text(choice(dropdown.options[1:]).text)
 
         try:
-            self.element_is_stale(
-                header_state,
-                error='header_state didn\'t change'
+
+            done_button = self.presence_of_element(
+                Locators.done_button,
+                error='done_button is no present',
+                timeout=1
             )
-        except TimeoutException as err:  # sometimes this happens
-            make_screenshot(err, 'country not selected', self.driver)
-            print_err('country not selected', err)
-            self.driver.refresh()
-            self.element_is_stale(
-                header_state,
-                error='header_state didn\'t change'
-            )
+            self.element_is_stale(done_button, timeout=1)
+            self.presence_of_elements(
+                Locators.continue_button
+            )[-1].click()
+
+        except TimeoutException as err:
+            make_screenshot(err, 'normal country', self.driver)
+            print_err('normal country', err)
+
+            self.presence_of_element(
+                Locators.done_button).click()
+
+        self.element_is_stale(
+            header_state,
+            error='header_state didn\'t change'
+
+        )
 
     def collect_cart(self) -> None:
         """Собирает товары в корзину."""

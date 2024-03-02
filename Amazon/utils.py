@@ -50,7 +50,7 @@ def make_screenshot(
         (Path.cwd() / 'Errors').mkdir()
 
     driver.get_screenshot_as_file(
-        f'{Path.cwd()}/Errors/{strftime("%d.%m.%Y_%H:%M:%S", localtime())}> {description}> {err.msg}.png'
+        f'{Path.cwd()}/Errors/{strftime("%d.%m.%Y_%H:%M:%S", localtime())}> {description}> {err.msg[:50]}.png'
     )
 
 

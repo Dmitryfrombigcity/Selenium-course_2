@@ -2,7 +2,7 @@ from pathlib import Path
 
 from selenium import webdriver
 
-from utils import delete_profile
+from utils import delete_dir
 
 
 # import undetected_chromedriver as webdriver # just in case
@@ -21,7 +21,7 @@ class Browser:
         # service = webdriver.ChromeService(service_args=['--log-level=DEBUG'], log_output='log.txt') # type: ignore
         options.add_argument('--window-size=1920,1080')  # type: ignore
         if (Path.cwd() / 'Profile').exists():
-            delete_profile()
+            delete_dir(Path.cwd() / 'Profile')
         options.add_argument("--user-data-dir=Profile/")
 
         options.add_experimental_option("excludeSwitches", ['enable-automation'])

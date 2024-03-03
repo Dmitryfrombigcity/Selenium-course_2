@@ -1,3 +1,4 @@
+from pathlib import Path
 from time import sleep
 
 from selenium.common.exceptions import WebDriverException
@@ -5,7 +6,7 @@ from selenium.common.exceptions import WebDriverException
 from amazon import Page
 from browser import Browser
 from utils import (make_screenshot, print_err,
-                   reset_cookies, print_start)
+                   print_start, delete_dir)
 
 
 def collect_data(
@@ -20,7 +21,7 @@ def collect_data(
     :return:
     """
 
-    reset_cookies()
+    delete_dir(Path.cwd() / 'Cookies')
     with Page('https://www.amazon.com/') as page:
         for _ in range(quantity_of_countries):
             print_start()

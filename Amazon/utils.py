@@ -66,16 +66,10 @@ def print_err(
     )
 
 
-def reset_cookies() -> None:
-    (Path.cwd() / 'Cookies/cookies.json').unlink(missing_ok=True)
-
-
-def delete_profile(
-        path: Path = (Path.cwd() / 'Profile')
-) -> None:
+def delete_dir(path: Path) -> None:
     for item in path.iterdir():
         if item.is_dir():
-            delete_profile(item)
+            delete_dir(item)
         else:
             item.unlink()
     path.rmdir()

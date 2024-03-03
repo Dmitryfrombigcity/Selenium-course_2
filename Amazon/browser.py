@@ -1,8 +1,6 @@
-from pathlib import Path
-
 from selenium import webdriver
 
-from utils import delete_profile
+from utils import delete_dir, profile_dir
 
 
 # import undetected_chromedriver as webdriver # just in case
@@ -17,11 +15,11 @@ class Browser:
                              f' AppleWebKit/537.36 (KHTML, like Gecko)'
                              f' Chrome/121.0.0.0 Safari/537.36')
         options.add_argument('--disable-blink-features=AutomationControlled')  # type: ignore
-        options.add_argument('--headless=new')  # type: ignore
+        # options.add_argument('--headless=new')  # type: ignore
         # service = webdriver.ChromeService(service_args=['--log-level=DEBUG'], log_output='log.txt') # type: ignore
         options.add_argument('--window-size=1920,1080')  # type: ignore
-        if (Path.cwd() / 'Profile').exists():
-            delete_profile()
+        if profile_dir.exists():
+            delete_dir(profile_dir)
         options.add_argument("--user-data-dir=Profile/")
 
         options.add_experimental_option("excludeSwitches", ['enable-automation'])

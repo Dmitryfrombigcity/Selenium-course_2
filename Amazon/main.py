@@ -5,7 +5,7 @@ from selenium.common.exceptions import WebDriverException
 from amazon import Page
 from browser import Browser
 from utils import (make_screenshot, print_err,
-                   reset_cookies, print_start)
+                   print_start, delete_dir, cookies_dir)
 
 
 def collect_data(
@@ -19,8 +19,8 @@ def collect_data(
     :param quantity_of_purchases: Количество попыток покупок для одной страны.
     :return:
     """
-
-    reset_cookies()
+    if cookies_dir.exists():
+        delete_dir(cookies_dir)
     with Page('https://www.amazon.com/') as page:
         for _ in range(quantity_of_countries):
             print_start()

@@ -8,7 +8,7 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
 
 from browser import Browser
-from utils import delete_profile
+from utils import delete_dir, profile_dir
 
 T = TypeVar('T')
 
@@ -32,7 +32,7 @@ class Base:
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         self._driver.close()
-        delete_profile()
+        delete_dir(profile_dir)
 
     @property
     def driver(self) -> WebDriver:

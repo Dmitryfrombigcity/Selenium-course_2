@@ -70,6 +70,11 @@ def print_err(
 
 
 def delete_dir(path: Path) -> None:
+    """
+    Deletes a directory with all its contents.
+    :param path: Filesystem path to a directory.
+    :return: None
+    """
     for item in path.iterdir():
         if item.is_dir():
             delete_dir(item)

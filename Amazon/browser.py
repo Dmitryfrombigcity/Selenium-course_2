@@ -15,7 +15,7 @@ class Browser:
                              f' AppleWebKit/537.36 (KHTML, like Gecko)'
                              f' Chrome/121.0.0.0 Safari/537.36')
         options.add_argument('--disable-blink-features=AutomationControlled')  # type: ignore
-        options.add_argument('--headless=new')  # type: ignore
+        # options.add_argument('--headless=new')  # type: ignore
         # service = webdriver.ChromeService(service_args=['--log-level=DEBUG'], log_output='log.txt') # type: ignore
         options.add_argument('--window-size=1920,1080')  # type: ignore
         if profile_dir.exists():

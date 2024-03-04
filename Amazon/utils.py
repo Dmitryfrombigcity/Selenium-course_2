@@ -5,7 +5,6 @@ from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 
-profile_dir = Path.cwd() / 'Profile'
 cookies_dir = Path.cwd() / 'Cookies'
 error_dir = Path.cwd() / 'Errors'
 

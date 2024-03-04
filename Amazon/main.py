@@ -10,7 +10,7 @@ from utils import (make_screenshot, print_err,
 
 def collect_data(
         quantity_of_countries: int = 20,
-        quantity_of_purchases: int = 5
+        quantity_of_purchases: int = 2
 ) -> None:
     """
     Собирает корзины товаров и записывает cookies в файл.
@@ -25,6 +25,7 @@ def collect_data(
         for _ in range(quantity_of_countries):
             print_start()
             try:
+                page.driver.close()
                 page.driver = Browser().driver
                 page.get_page()
                 page.check_captcha()

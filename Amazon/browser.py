@@ -1,7 +1,5 @@
 from selenium import webdriver
 
-from utils import delete_dir, profile_dir
-
 
 # import undetected_chromedriver as webdriver # just in case
 
@@ -18,10 +16,6 @@ class Browser:
         # options.add_argument('--headless=new')  # type: ignore
         # service = webdriver.ChromeService(service_args=['--log-level=DEBUG'], log_output='log.txt') # type: ignore
         options.add_argument('--window-size=1920,1080')  # type: ignore
-        if profile_dir.exists():
-            delete_dir(profile_dir)
-        options.add_argument(f"--user-data-dir={profile_dir}")
-
         options.add_experimental_option("excludeSwitches", ['enable-automation'])
         self.driver = webdriver.Chrome(options=options)
         self.driver.set_page_load_timeout(30)

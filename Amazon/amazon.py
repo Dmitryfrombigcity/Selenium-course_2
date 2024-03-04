@@ -11,7 +11,7 @@ from base import Base
 from exceptions import Captcha
 from locators import Locators
 from utils import (print_items, make_screenshot, print_err,
-                   print_title)
+                   print_title, cookies_dir)
 
 
 class Page(Base):
@@ -56,29 +56,20 @@ class Page(Base):
         dropdown = Select(
             self.presence_of_element(Locators.countries_dropdown)
         )
-
-        # dropdown.select_by_visible_text('American Samoa')
-
         dropdown.select_by_visible_text(choice(dropdown.options[1:]).text)
 
-        try:
+        done_button = self.presence_of_element(
+            Locators.done_button,
+            error='done_button is no present',
+            timeout=1
+        )
 
-            done_button = self.presence_of_element(
-                Locators.done_button,
-                error='done_button is no present',
-                timeout=1
-            )
-            self.element_is_stale(done_button, timeout=1)
+        if self.element_is_not_stale(done_button, 1):
+            done_button.click()
+        else:
             self.presence_of_elements(
                 Locators.continue_button
             )[-1].click()
-
-        except TimeoutException as err:
-            make_screenshot(err, 'normal country', self.driver)
-            print_err('normal country', err)
-
-            self.presence_of_element(
-                Locators.done_button).click()
 
         self.element_is_stale(
             header_state,
@@ -141,8 +132,8 @@ class Page(Base):
         self.presence_of_element(Locators.title)
         self._check_cookies_file()
 
-        with open(Path.cwd() / 'Cookies/cookies.json', 'r+', encoding='utf-8') as file:
-            if not (Path.cwd() / 'Cookies/cookies.json').stat().st_size:
+        with open(Path(cookies_dir, 'cookies.json'), 'r+', encoding='utf-8') as file:
+            if not (Path(cookies_dir, 'cookies.json')).stat().st_size:
                 cookies = [self.driver.get_cookies()]
             else:
                 cookies = [*json.load(file), self.driver.get_cookies()]
@@ -152,7 +143,7 @@ class Page(Base):
     def apply_cookies(self) -> None:
         """Считывает cookies из файла и применяет их."""
 
-        with open(Path.cwd() / 'Cookies/cookies.json', 'r', encoding='utf-8') as file:
+        with open(Path(cookies_dir, 'cookies.json'), 'r', encoding='utf-8') as file:
             cookies_lst = json.load(file)
 
         for cookies in cookies_lst:
@@ -231,7 +222,7 @@ class Page(Base):
     def _check_cookies_file() -> None:
         """Проверяет наличие файла Cookies/cookies.json в рабочем каталоге. """
 
-        if not (Path.cwd() / 'Cookies').exists():
-            (Path.cwd() / 'Cookies').mkdir()
-        if not (Path.cwd() / 'Cookies/cookies.json').exists():
-            (Path.cwd() / 'Cookies/cookies.json').touch()
+        if not cookies_dir.exists():
+            cookies_dir.mkdir()
+        if not (Path(cookies_dir, 'cookies.json')).exists():
+            (Path(cookies_dir, 'cookies.json')).touch()

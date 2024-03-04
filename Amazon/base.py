@@ -1,6 +1,7 @@
-from time import sleep
+from time import sleep, monotonic
 from typing import TypeVar
 
+from selenium.common import StaleElementReferenceException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
@@ -142,3 +143,28 @@ class Base:
             ec.staleness_of(element=element),
             message=error
         )
+
+    def element_is_not_stale(
+            self,
+            element: WebElement,
+            timeout: float | None = None
+    ) -> bool:
+        """
+        Проверяет стал ли элемент stale в течении заданного интервала времени.
+        :param element: Заданный элемент.
+        :param timeout: Заданный интервал времени.
+        :return: True, если не стал; False, если стал.
+        """
+
+        if timeout is None:
+            timeout = self._timeout
+
+        end_time = monotonic() + timeout
+        while True:
+            try:
+                element.is_enabled()
+            except StaleElementReferenceException:
+                return False
+            sleep(self._poll_frequency)
+            if monotonic() > end_time:
+                return True

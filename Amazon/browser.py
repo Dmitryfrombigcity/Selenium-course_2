@@ -20,7 +20,7 @@ class Browser:
         options.add_argument('--window-size=1920,1080')  # type: ignore
         if profile_dir.exists():
             delete_dir(profile_dir)
-        options.add_argument("--user-data-dir=Profile/")
+        options.add_argument(f"--user-data-dir={profile_dir}")
 
         options.add_experimental_option("excludeSwitches", ['enable-automation'])
         self.driver = webdriver.Chrome(options=options)

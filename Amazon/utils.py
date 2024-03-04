@@ -7,6 +7,7 @@ from selenium.webdriver.remote.webelement import WebElement
 
 profile_dir = Path.cwd() / 'Profile'
 cookies_dir = Path.cwd() / 'Cookies'
+error_dir = Path.cwd() / 'Errors'
 
 
 def print_items(
@@ -49,11 +50,11 @@ def make_screenshot(
         description: str,
         driver: WebDriver
 ) -> None:
-    if not (Path.cwd() / 'Errors').exists():
-        (Path.cwd() / 'Errors').mkdir()
+    if not error_dir.exists():
+        error_dir.mkdir()
 
     driver.get_screenshot_as_file(
-        f'{Path.cwd()}/Errors/{strftime("%d.%m.%Y_%H:%M:%S", localtime())}> {description}>'
+        f'{error_dir}/{strftime("%d.%m.%Y_%H:%M:%S", localtime())}> {description}>'
         f' {tmp[:50] if isinstance(tmp := err.msg, str) else tmp}.png'
     )
 

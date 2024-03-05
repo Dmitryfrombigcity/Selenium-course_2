@@ -25,7 +25,6 @@ def collect_data(
         for _ in range(quantity_of_countries):
             print_start()
             try:
-                page.driver.close()
                 page.driver = Browser().driver
                 page.get_page()
                 page.check_captcha()

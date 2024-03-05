@@ -25,7 +25,8 @@ class Base:
         self.url = url
         self._timeout = timeout
         self._poll_frequency = poll_frequency
-        self.driver: WebDriver = Browser().driver
+        self._driver: WebDriver = Browser().driver
+        self.action = ActionChains(self._driver)
 
     def __enter__(self: T) -> T:
         return self
@@ -39,6 +40,7 @@ class Base:
 
     @driver.setter
     def driver(self, value: WebDriver) -> None:
+        self._driver.close()
         self._driver = value
         self.action = ActionChains(self._driver)
 

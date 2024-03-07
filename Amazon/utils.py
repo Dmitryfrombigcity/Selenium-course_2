@@ -15,20 +15,20 @@ def print_items(
         element: WebElement
 ) -> None:
     print(
-        f'######################'
+        f'{"":#>22}'
         f'{prefix}ies',
         *(item.get_attribute('text') for item in lst_copy),
         sep='\n'
     )
     print(
-        f"######################"
+        f'{"":#>22}'
         f"{prefix}y = {element.get_attribute('text')}"
     )
 
 
 def print_title(driver: WebDriver) -> None:
     print(
-        f'######################'
+        f'{"":#>22}'
         f'title = {driver.title}',
         '',
         sep='\n'
@@ -38,7 +38,7 @@ def print_title(driver: WebDriver) -> None:
 def print_start() -> None:
     print(
         '',
-        f'######################'
+        f'{"":#>22}'
         f'Starting',
         sep='\n'
     )
@@ -63,7 +63,7 @@ def print_err(
         err: WebDriverException
 ) -> None:
     print(
-        f'######################'
+        f'{"":#>22}'
         f'{strftime("%d.%m.%Y_%H:%M:%S", localtime())}> {title}> {err.__class__.__name__}> {err.msg}',
         sep='\n'
     )

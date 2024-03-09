@@ -1,2 +1,7 @@
-Selenium на Python
-https://stepik.org/course/188355
+Задачи для курса **Selenium на Python**  
+https://stepik.org/course/188355  
+**Amazon**  
+Демо-программа, которая произвольно выбирают страну и пытается сделать покупки.
+  + Начальные установки **main.py**.  
+    + _quantity_of_countries_ -- количество стран;  
+      _quantity_of_purchases_ -- планируемое количество покупок на страну.
